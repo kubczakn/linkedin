@@ -30,7 +30,7 @@ function getCompanies() {
   // Perform queries
   // Let i = 1 to limit # of requests while debugging
   // change to i < companies.length for production
-  for (var i = 0; i < companies.length; i++) {
+  for (var i = 0; i < 1; i++) {
     // Type in query
     let query = `site:linkedin.com "@${companies[i]}.com" "recruiter" email`;
     await page.keyboard.type(query);
