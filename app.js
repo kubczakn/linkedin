@@ -76,21 +76,24 @@ async function main() {
     // Change viewport
     await page.setViewport({width: 1366, height: 768});
     await page.goto('https://google.com');
-    await page.$("#oneGoogleBar");
-    let halt = companies.length / 2;
+    await page.focus("input[name=q");
+    // await page.$("#oneGoogleBar");
+    // Checkpoint for every ten iterations
+    let checkpoint = 10;
     for (var i = 0; i < companies.length; ++i) {
         // Type in query
-        let query = `site:linkedin.com "@${company}.com" "recruiter" email`;
+        let query = `site:linkedin.com "@${companies[i]}.com" "recruiter" email`;
         await page.keyboard.type(query);
         // Search
         await page.keyboard.press('Enter');
         await page.waitForNavigation();
         // Create timeout to limit request frequency
-        // await page.waitForTimeout(5000 * randomTimeout());
-        await page.waitForTimeout(5000);
-        // Timeout for ten minutes if halfway through list
-        if (i === half) {
-          await page.waitForTimeout(60000 * 10);
+        await page.waitForTimeout(5000 * randomTimeout());
+        // await page.waitForTimeout(5000);
+        // Timeout for ten minutes if checkpoint hit 
+        if (((i % checkpoint) === 0) && (i !== 0)) {
+          console.log('Checkpoint hit!')
+          await page.waitForTimeout(60000 * 10); 
         }
         // // Scrape query results
         // // let links = await page.$$eval("a[href*='tutor']", as => as.map(a => a.href));
