@@ -2,7 +2,7 @@
 const puppeteer = require('puppeteer-extra');
 const fs = require('fs');
 const randomUserAgent = require('random-useragent');
-// const userAgent = require('user-agents');
+const Excel = require('exceljs');
 
 // Add stealth plugin
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -56,7 +56,19 @@ async function scrape(port, company) {
 
 // Scrape and store results over companies
 async function main() {
+    // Get companies 
     const companies = getCompanies().split(/\r?\n/);
+    // Create a new workbook
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet('Recruiter LinkedIns');
+    let columns = []
+    // Add worksheet columns
+    for (var i = 0; i < 1; ++i) {
+      columns.push({header: `${companies[i]}`, 
+                              key: 'link', 
+                              width: 200});
+    }
+    worksheet.columns = columns;
     // const ports = [
     //   '9050',
     //   '9052',
@@ -80,24 +92,31 @@ async function main() {
     // await page.$("#oneGoogleBar");
     // Checkpoint for every ten iterations
     let checkpoint = 10;
-    for (var i = 0; i < companies.length; ++i) {
+    // Use i < companies.length for production
+    for (var i = 0; i < 1; ++i) {
         // Type in query
         let query = `site:linkedin.com "@${companies[i]}.com" "recruiter" email`;
         await page.keyboard.type(query);
         // Search
         await page.keyboard.press('Enter');
         await page.waitForNavigation();
-        // Create timeout to limit request frequency
+        // Scrape query results
+        // TOOD: Add scrolling to grab all links
+        let links = await page.$$eval("a[href*='www.linkedin.com']", as => as.map(a => a.href));
+        // console.log(links);
+        // Add links to company column in worksheet 
+        for (var j = 0; j < links.length; j++) {
+          worksheet.getRow(j + 2).values = {
+              link: links[j]
+          };
+        }
+        // Create random timeout to limit request frequency
         await page.waitForTimeout(5000 * randomTimeout());
-        // await page.waitForTimeout(5000);
         // Timeout for ten minutes if checkpoint hit 
         if (((i % checkpoint) === 0) && (i !== 0)) {
           console.log('Checkpoint hit!')
           await page.waitForTimeout(60000 * 10); 
         }
-        // // Scrape query results
-        // // let links = await page.$$eval("a[href*='tutor']", as => as.map(a => a.href));
-        // // console.log(links);
         // Clear Search logic
         await page.focus("input[name=q");
         // Highlight query
@@ -114,8 +133,11 @@ async function main() {
     }
     
 
-    // // Close browser
+    // Close browser
     await browser.close();
+
+    // Save Excel file 
+    workbook.xlsx.writeFile('Links.xlsx');
     return;
 }
 
