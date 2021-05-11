@@ -72,6 +72,8 @@ async function main() {
                               width: 200});
     }
     worksheet.columns = columns;
+    // Make headers bold  
+    worksheet.getRow(1).font = {bold: true}
     // const ports = [
     //   '9050',
     //   '9052',
