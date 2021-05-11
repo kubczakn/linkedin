@@ -63,9 +63,12 @@ async function main() {
     const worksheet = workbook.addWorksheet('Recruiter LinkedIns');
     let columns = []
     // Add worksheet columns
-    for (var i = 0; i < 1; ++i) {
+    for (var i = 0; i < 2; ++i) {
+      // columns.push({header: `${companies[i]}`, 
+      //                         key: 'link', 
+      //                         width: 200});
       columns.push({header: `${companies[i]}`, 
-                              key: 'link', 
+                              key: `${companies[i]}`, 
                               width: 200});
     }
     worksheet.columns = columns;
@@ -93,7 +96,7 @@ async function main() {
     // Checkpoint for every ten iterations
     let checkpoint = 10;
     // Use i < companies.length for production
-    for (var i = 0; i < 1; ++i) {
+    for (var i = 0; i < 2; ++i) {
         // Type in query
         let query = `site:linkedin.com "@${companies[i]}.com" "recruiter" email`;
         await page.keyboard.type(query);
@@ -101,15 +104,10 @@ async function main() {
         await page.keyboard.press('Enter');
         await page.waitForNavigation();
         // Scrape query results
-        // TOOD: Add scrolling to grab all links
         let links = await page.$$eval("a[href*='www.linkedin.com']", as => as.map(a => a.href));
-        // console.log(links);
-        // Add links to company column in worksheet 
-        for (var j = 0; j < links.length; j++) {
-          worksheet.getRow(j + 2).values = {
-              link: links[j]
-          };
-        }
+        // Add links to company column in worksheet
+        let col = worksheet.getColumn(`${companies[i]}`); 
+        col.values = col.values.concat(links);
         // Create random timeout to limit request frequency
         await page.waitForTimeout(5000 * randomTimeout());
         // Timeout for ten minutes if checkpoint hit 
