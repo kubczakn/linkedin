@@ -24,36 +24,6 @@ function getCompanies() {
   }
 }
 
-// Scrape a query
-async function scrape(port, company) {
-  const browser = await puppeteer.launch({headless: false,
-                                          slowMo: 20,
-                                          // args: ['--proxy-server=socks5://127.0.0.1:' + 9053]
-                                        });
-  const page = (await browser.pages())[0];
-  // await page.setUserAgent(userAgent.toString());
-  await page.setUserAgent(randomUserAgent.getRandom());
-  // Change viewport
-  await page.setViewport({width: 1366, height: 768});
-  await page.goto('https://google.com');
-  await page.$("#oneGoogleBar");
-  // Type in query
-  let query = `site:linkedin.com "@${company}.com" "recruiter" email`;
-  await page.keyboard.type(query);
-  // Search
-  await page.keyboard.press('Enter');
-  await page.waitForNavigation();
-  // Create timeout to limit request frequency
-  // await page.waitForTimeout(5000 * randomTimeout());
-  await page.waitForTimeout(5000);
-  // // Scrape query results
-  // // let links = await page.$$eval("a[href*='tutor']", as => as.map(a => a.href));
-  // // console.log(links);
-
-  // // Close browser
-  await browser.close();
-}
-
 // Scrape and store results over companies
 async function main() {
     // Get companies 
@@ -64,9 +34,6 @@ async function main() {
     let columns = []
     // Add worksheet columns
     for (var i = 0; i < 2; ++i) {
-      // columns.push({header: `${companies[i]}`, 
-      //                         key: 'link', 
-      //                         width: 200});
       columns.push({header: `${companies[i]}`, 
                               key: `${companies[i]}`, 
                               width: 200});
@@ -74,15 +41,6 @@ async function main() {
     worksheet.columns = columns;
     // Make headers bold  
     worksheet.getRow(1).font = {bold: true}
-    // const ports = [
-    //   '9050',
-    //   '9052',
-    //   '9053',
-    //   '9054'
-    // ];
-    // for (var i = 0; i < companies.length; ++i) {
-    //     await scrape(ports[i % 4], companies[i]);
-    // }
 
     const browser = await puppeteer.launch({headless: false,
       slowMo: 20
@@ -132,7 +90,6 @@ async function main() {
         await page.keyboard.press('Backspace');
     }
     
-
     // Close browser
     await browser.close();
 
@@ -142,19 +99,4 @@ async function main() {
 }
 
 main();
-
-
-// Clear Search logic
-  // await page.focus("input[name=q");
-  // // Highlight query
-  // for (let i = 0; i < query.length; i++) {
-  //       await page.keyboard.press('ArrowRight');
-  // }
-  // await page.keyboard.down('Shift');
-  // for (let i = 0; i < query.length; i++) {
-  //       await page.keyboard.press('ArrowLeft');
-  // }
-  // await page.keyboard.up('Shift');
-  // // Backspace query
-  // await page.keyboard.press('Backspace');
 
